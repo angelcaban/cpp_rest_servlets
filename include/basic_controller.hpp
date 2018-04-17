@@ -29,7 +29,7 @@
 #include <cpprest/http_listener.h>
 #include <pplx/pplxtasks.h>
 #include <string>
-#include "controller.hpp"
+#include "icontroller.hpp"
 
 using namespace web;
 using namespace http::experimental::listener;

@@ -21,18 +21,26 @@ namespace restful_servlets {
 
   bool AbstractServlet::doHandle(http_request & req) {
     auto const& p = req.request_uri().path();
-    if (p.size() > path_.size()) return false;
+    if (p.size() > path_.size()) {
+      return false;
+    }
 
     // If exact path match, handle request directly.
-    if (p == path_) return handle(req);
+    if (p == path_) {
+      return handle(req);
+    }
 
     // Is any part of request path owned by us?
     size_t i = 0;
     string subpath;
     for (; i < path_.size(); ++i) {
-      if (path_[i] != p[i]) break;
+      if (path_[i] != p[i]) {
+	break;
+      }
     }
-    if (i != path_.size()) return false; // no sub-match
+    if (i != path_.size()) {
+      return false; // no sub-match
+    }
 
     subpath = p.substr(i); // sub-path
     // Rebuild URI with the sub path
@@ -58,4 +66,4 @@ namespace restful_servlets {
     return handled;
   }
 
-} // namespace my_service
+} // namespace restful_servlets

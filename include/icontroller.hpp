@@ -12,8 +12,8 @@
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
 
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -26,25 +26,30 @@
 
 #pragma once
 
-#define BOOST_SPIRIT_THREADSAFE // enable thread safety to json read on property tree!
+#include <cpprest/http_msg.h>
 
-#include <boost/format.hpp>
+using namespace web;
+using namespace http;
 
-#include <boost/log/core.hpp>
-#include <boost/log/trivial.hpp>
-#include <boost/log/expressions.hpp>
-#include <boost/log/utility/setup/console.hpp>
-#include <boost/log/support/date_time.hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
+namespace cfx {
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
+/*!
+ * Dispatcher class represents the basic interface for a
+ * web serivce handler.
+ */
+class IController {
+ public:
+  virtual ~IController() = default;
+  virtual void handleGet(http_request message) = 0;
+  virtual void handlePut(http_request message) = 0;
+  virtual void handlePost(http_request message) = 0;
+  virtual void handleDelete(http_request message) = 0;
+  virtual void handlePatch(http_request messge) = 0;
+  virtual void handleHead(http_request message) = 0;
+  virtual void handleOptions(http_request message) = 0;
+  virtual void handleTrace(http_request message) = 0;
+  virtual void handleConnect(http_request message) = 0;
+  virtual void handleMerge(http_request message) = 0;
+};
 
-#include <boost/asio.hpp>
-#include <boost/algorithm/string.hpp>
-
-#include <string>
-#include <iostream>
-#include <vector>
-#include <map>
-#include <regex>
+} // namespace cfx

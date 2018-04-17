@@ -1,4 +1,4 @@
-i//
+//
 //  Created by Ivan Mejia on 11/28/16.
 //
 // MIT License
@@ -26,6 +26,10 @@ i//
 
 #include "network_utils.hpp"
 
+using boost::asio::io_service;
+using boost::asio::ip::tcp;
+using boost::asio::ip::host_name;
+
 namespace cfx {
 
   HostInetInfo NetworkUtils::queryHostInetInfo() {
@@ -35,7 +39,7 @@ namespace cfx {
     return resolver.resolve(query);
   }
 
-  std::string NetworkUtils::hostIP(unsigned short family) {
+  std::string NetworkUtils::hostIP(uint16_t family) {
     auto hostInetInfo = queryHostInetInfo();
     tcp::resolver::iterator end;
     while(hostInetInfo != end) {

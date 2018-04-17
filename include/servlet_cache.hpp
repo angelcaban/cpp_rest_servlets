@@ -8,8 +8,8 @@
 namespace restful_servlets {
 
   /*! In-Memory cache for all servlets provided by this Controller.
-    This is a sealed class that provides a singleton for use for
-    the lifetime of the Controller’s process. */
+   *  This is a sealed class that provides a singleton for use for
+   *  the lifetime of the Controller’s process. */
   class ServletCache {
   public:
     using abstract_type = restful_servlets::AbstractServlet;
@@ -17,10 +17,10 @@ namespace restful_servlets {
     using creator_fn = std::function<abstract_type*(id_to_hash&&)>;
     using servlet_container =
       boost::container::flat_map<id_to_hash, std::unique_ptr<abstract_type>>;
+    using size_type = servlet_container::size_type;
 
   private:
     ServletFactory<abstract_type*, id_to_hash, creator_fn> _factory;
-
     servlet_container _servlets;
 
     ServletCache() = default;
@@ -28,6 +28,13 @@ namespace restful_servlets {
 
   public:
     ~ServletCache() = default;
+
+    size_type typesSize() {
+      return _factory.size();
+    }
+    size_type cacheSize() {
+      return _servlets.size();
+    }
 
     /*! Find or create a servlet with a given ID */
     template <class... args>
@@ -48,7 +55,7 @@ namespace restful_servlets {
     }
 
     /*! Remove a servlet from a given ID
-     *  from the cache and return it. */
+     *  from the cache. */
     void removeServlet(std::string const& id) {
       if (auto i = _servlets.find(id); i != _servlets.end()) {
 	_servlets.erase(i);
@@ -59,6 +66,12 @@ namespace restful_servlets {
      *  by the Servlet Factory */
     void registerType(std::string&& id, creator_fn maker) {
       _factory.register_maker(id, maker);
+    }
+
+    /*! Clear all data from fixtures and servlet cache */
+    void clearAll() {
+      _servlets.clear();
+      _factory.clear();
     }
 
     ServletCache(ServletCache const&) = delete;

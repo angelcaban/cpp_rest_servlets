@@ -2,7 +2,7 @@
 
 namespace restful_servlets {
 
-void MyController::initRestOpHandlers() {
+void ServletController::initRestOpHandlers() {
   auto handler = [&](auto req) { doHandle(req); };
   _listener.support(methods::GET, handler);
   _listener.support(methods::POST, handler);

@@ -5,7 +5,7 @@ namespace restful_servlets {
 std::unique_ptr<ServletCache> ServletCache::_singleton;
 
 ServletCache *const ServletCache::getInstance() {
-  if (_singleton.get() == nullptr) {
+  if (!_singleton) {
     _singleton.reset(new ServletCache);
   }
   return _singleton.get();
