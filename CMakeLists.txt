@@ -21,10 +21,10 @@ find_program (
   DOC "Path to clang-tidy executable"
 )
 if (NOT CLANG_TIDY_EXE)
-  message(STATUS "clang-tidy not found.")
+  message (STATUS "clang-tidy not found.")
 else ()
-  message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-  set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}"
+  message (STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+  set (DO_CLANG_TIDY "${CLANG_TIDY_EXE}"
     "-checks=-*,clang-analyzer-.*,clang-analyzer-cplusplus-*,google-*,readability-*,-readability-redundant-declaration")
 endif ()
 # --------------------------------------------- END clang-tidy --
@@ -38,7 +38,7 @@ execute_process (COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/third_party/gtest
 )
 if (result)
-  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+  message (FATAL_ERROR "CMake step for googletest failed: ${result}")
 endif()
 
 execute_process (COMMAND ${CMAKE_COMMAND} --build .
@@ -46,19 +46,64 @@ execute_process (COMMAND ${CMAKE_COMMAND} --build .
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/third_party/gtest
 )
 if (result)
-  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+  message (FATAL_ERROR "CMake step for googletest failed: ${result}")
 endif()
-# ----------------------------------------- END GTEST FRAMEWORK --
 
-find_package (Threads REQUIRED)
-if (THREADS_HAVE_PTHREAD_ARG)
-  add_compile_options (-pthread)
+add_subdirectory(
+  ${CMAKE_BINARY_DIR}/gtest-src
+  ${CMAKE_BINARY_DIR}/gtest-build
+  EXCLUDE_FROM_ALL
+)
+# ---------------------------------------- END GTEST FRAMEWORK --
+
+# cpprestapi FRAMEWORK ------------------------------------------
+configure_file (third_party/cpprestsdk/CMakeLists.txt.in
+  third_party/cpprestsdk/CMakeLists.txt
+)
+execute_process (COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/third_party/cpprestsdk
+)
+if (result)
+  message (FATAL_ERROR "CMake step for cpprestapi failed: ${result}")
 endif()
-if (CMAKE_THREAD_LIBS_INIT)
-  link_libraries (${CMAKE_THREAD_LIBS_INIT})
-endif ()
 
-find_package (Boost REQUIRED
+execute_process (COMMAND ${CMAKE_COMMAND} --build .
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/third_party/cpprestsdk
+)
+if (result)
+  message (FATAL_ERROR "CMake step for cpprestapi failed: ${result}")
+endif()
+
+execute_process (COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}"
+                         ${CMAKE_BINARY_DIR}/cpprestsdk-src/Release
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/cpprestsdk-build
+)
+if (result)
+  message (FATAL_ERROR "CMake step for cpprestapi failed: ${result}")
+endif()
+
+execute_process (COMMAND ${CMAKE_COMMAND} --build .
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/cpprestsdk-build
+)
+if (result)
+  message (FATAL_ERROR "CMake step for cpprestapi failed: ${result}")
+endif()
+
+add_subdirectory (
+  ${CMAKE_BINARY_DIR}/cpprestsdk-src/Release
+  ${CMAKE_BINARY_DIR}/cpprestsdk-build
+  EXCLUDE_FROM_ALL
+  )
+# ----------------------------------- END cpprestapi FRAMEWORK --
+
+find_library (cpprest    HINTS ${CMAKE_BINARY_DIR}/cpprestsdk-build/Binaries)
+find_package (OpenSSL    REQUIRED)
+find_package (Threads    REQUIRED)
+find_package (Boost      REQUIRED
   COMPONENTS
     random
     system
@@ -69,8 +114,6 @@ find_package (Boost REQUIRED
     date_time
     regex
 )
-find_package (cpprestsdk  REQUIRED)
-find_package (OpenSSL     REQUIRED)
 
 add_definitions(
   "-D_TURN_OFF_PLATFORM_STRING=1"
@@ -78,8 +121,8 @@ add_definitions(
 
 include_directories (
   ${Boost_INCLUDE_DIRS}
-  cpprestsdk::cpprest
   ${PROJECT_SOURCE_DIR}/include
+  ${CMAKE_BINARY_DIR}/cpprestsdk-src/Release/include
 )
 
 # PROJECT -------------------------------------------------------
@@ -105,16 +148,11 @@ endif ()
 # ------------------------------------------------ END PROJECT --
 
 # TESTS ---------------------------------------------------------
-add_subdirectory(
-  ${CMAKE_BINARY_DIR}/gtest-src
-  ${CMAKE_BINARY_DIR}/gtest-build
-  EXCLUDE_FROM_ALL
-)
 
 add_executable(service_test tests/service_test.cpp)
 target_link_libraries(service_test
   gtest
-  cpprestsdk::cpprest
+  cpprest
   ${OPENSSL_LIBRARIES}
   ${PROJECT_NAME}
 )

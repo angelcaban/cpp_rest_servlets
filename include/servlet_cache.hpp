@@ -29,10 +29,10 @@ namespace restful_servlets {
   public:
     ~ServletCache() = default;
 
-    size_type typesSize() {
+    size_type typesSize() const {
       return _factory.size();
     }
-    size_type cacheSize() {
+    size_type cacheSize() const {
       return _servlets.size();
     }
 

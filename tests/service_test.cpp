@@ -5,11 +5,10 @@
 #include <utility>
 
 #include <cpprest/containerstream.h>
-#include <basic_controller.hpp>
-#include <runtime_utils.hpp>
-#include <std_micro_service.hpp>
-#include <usr_interrupt_handler.hpp>
+#include <cpprest/http_msg.h>
+#include <cpprest/http_client.h>
 
+#include <rest_service.hpp>
 #include <servlet_controller.hpp>
 
 #include <gtest/gtest.h>
@@ -105,15 +104,71 @@ namespace {
     EXPECT_EQ(0u, ServletCache::getInstance()->cacheSize());
   }
 
+  TEST_F(ServiceFixture, createServlets) {
+    using web::http::client::http_client;
+    using web::http::method;
+    using web::http::methods;
+
+    controller.registerServlet<HelloWorldServlet>("/hello-world");
+    controller.registerServlet<RootServlet>("/");
+    controller.setEndpoint("http://localhost:33434");
+    controller.accept().wait();
+
+    http_client client{{"http://localhost:33434"}};
+    {
+      auto task1 = client.request(methods::GET, "/");
+      auto result1 = task1.wait();
+      ASSERT_EQ(pplx::completed, result1);
+
+      auto response = task1.get();
+      auto task2 = response.extract_string();
+      auto result2 = task2.wait();
+      ASSERT_EQ(pplx::completed, result2);
+
+      ASSERT_EQ(RootServlet::BODY_STR, task2.get());
+    }
+    {
+      auto task1 = client.request(methods::GET, "/hello-world");
+      auto result1 = task1.wait();
+      ASSERT_EQ(pplx::completed, result1);
+
+      auto response = task1.get();
+      auto task2 = response.extract_string();
+      auto result2 = task2.wait();
+      ASSERT_EQ(pplx::completed, result2);
+
+      ASSERT_EQ(HelloWorldServlet::BODY_STR, task2.get());
+    }
+  }
+
+  TEST_F(ServiceFixture, callBadUrl) {
+    using web::http::client::http_client;
+    using web::http::method;
+    using web::http::methods;
+
+    controller.registerServlet<HelloWorldServlet>("/hello-world");
+    controller.setEndpoint("http://localhost:33434");
+    controller.accept().wait();
+
+    http_client client{{"http://localhost:33434"}};
+    auto task1 = client.request(methods::GET, "/bad-url/");
+    auto result1 = task1.wait();
+
+    ASSERT_EQ(pplx::completed, result1);
+
+    auto response = task1.get();
+    auto task2 = response.extract_string();
+    auto result2 = task2.wait();
+
+    ASSERT_EQ(pplx::completed, result2);
+    ASSERT_EQ("", task2.get());
+    ASSERT_EQ(404, response.status_code());
+  }
+
 } // namespace
 
 int main(int argc, char** argv) {
   /*
-  InterruptHandler::hookSIGINT();
-
-  MyController server;
-  server.setEndpoint("http://host_auto_ip4:33434");
-
   try {
     server.accept().wait();
 
