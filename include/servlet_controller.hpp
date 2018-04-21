@@ -1,8 +1,13 @@
 #pragma once
 
+#include <utility>
+#include <stdexcept>
+#include <functional>
 #include <servlet_cache.hpp>
 
 namespace restful_servlets {
+
+  using optional_parent = std::optional<std::reference_wrapper<std::string>>;
 
   template <class T>
   T* servlet_create(std::string&& s) {
@@ -16,10 +21,22 @@ namespace restful_servlets {
     virtual ~ServletController() override = default;
 
     template <typename T>
-    void registerServlet(std::string && path) {
+    void registerServlet(std::string && path,
+			 optional_parent parent = std::nullopt) {
       auto cache = ServletCache::getInstance();
-      cache->registerType(std::move(path),
-			  std::bind(&servlet_create<T>, std::placeholders::_1));
+      std::string id{std::move(path)};
+      if (parent) {
+	id += ">" + parent->get();
+      }
+      cache->registerType(std::move(id),
+			  std::bind(&servlet_create<T>,
+				    std::placeholders::_1));
+      if (nullptr == cache->createOrFindServlet(id)) {
+	std::string msg;
+	msg += id;
+	msg += " is an invalid ID.";
+	throw std::invalid_argument(msg);
+      }
     }
 
     void handleGet(http_request) override;

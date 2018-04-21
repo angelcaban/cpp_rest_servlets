@@ -30,13 +30,17 @@ class AbstractServlet {
   AbstractServlet(std::string&& path);
   virtual ~AbstractServlet() = default;
 
-  std::string const& getPath() const { return path_; }
+  IdType const& getPath() const { return path_; }
   void setPath(const char* path) { path_ = path; }
-  void setPath(std::string const& path) { path_ = path; }
-  void setPath(std::string&& path) { path_ = std::move(path); }
+  void setPath(IdType const& path) { path_ = path; }
+  void setPath(IdType && path) { path_ = std::move(path); }
 
   void addChild(std::string const& subpath, AbstractServlet* child) {
     children_.insert(std::make_pair(subpath, child));
+  }
+
+  ChildServletMap::size_type childrenCount() const {
+    return children_.size();
   }
 
   bool doHandle(web::http::http_request& req);

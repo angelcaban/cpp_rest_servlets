@@ -32,6 +32,8 @@ using ::testing::UnitTest;
 
 namespace {
 
+  constexpr char endpoint[] = "http://localhost:33434";
+
   class ServiceFixture : public Test {
   public:
     ServletController controller;
@@ -52,7 +54,26 @@ namespace {
     RootServlet(const char* path) : AbstractServlet(path) {}
     RootServlet(string const& path) : AbstractServlet(path) {}
     RootServlet(string&& path) : AbstractServlet(path) {}
-    virtual ~RootServlet() = default;
+    virtual ~RootServlet() override = default;
+
+    virtual bool handle(http_request& req) override {
+      utf8string body{BODY_STR};
+      req.reply(status_codes::OK, std::move(body),
+		"text/html; charset=utf-8");
+      return true;
+    }
+  };
+
+  class RootChildServlet : public AbstractServlet {
+  public:
+    constexpr static char BODY_STR[]{
+      "{ \"child_of_root\" : true }"};
+
+    RootChildServlet() : AbstractServlet() {}
+    RootChildServlet(const char* path) : AbstractServlet(path) {}
+    RootChildServlet(string const& path) : AbstractServlet(path) {}
+    RootChildServlet(string&& path) : AbstractServlet(path) {}
+    virtual ~RootChildServlet() override = default;
 
     virtual bool handle(http_request& req) override {
       utf8string body{BODY_STR};
@@ -92,7 +113,7 @@ namespace {
 
     EXPECT_NE(nullptr, ServletCache::getInstance());
     EXPECT_EQ(1u, ServletCache::getInstance()->typesSize());
-    EXPECT_EQ(0u, ServletCache::getInstance()->cacheSize());
+    EXPECT_EQ(1u, ServletCache::getInstance()->cacheSize());
   }
 
   TEST_F(ServiceFixture, registerTwoServlets) {
@@ -101,7 +122,7 @@ namespace {
 
     EXPECT_NE(nullptr, ServletCache::getInstance());
     EXPECT_EQ(2u, ServletCache::getInstance()->typesSize());
-    EXPECT_EQ(0u, ServletCache::getInstance()->cacheSize());
+    EXPECT_EQ(2u, ServletCache::getInstance()->cacheSize());
   }
 
   TEST_F(ServiceFixture, createServlets) {
@@ -139,6 +160,8 @@ namespace {
 
       ASSERT_EQ(HelloWorldServlet::BODY_STR, task2.get());
     }
+
+    controller.shutdown().wait();
   }
 
   TEST_F(ServiceFixture, callBadUrl) {
@@ -147,10 +170,10 @@ namespace {
     using web::http::methods;
 
     controller.registerServlet<HelloWorldServlet>("/hello-world");
-    controller.setEndpoint("http://localhost:33434");
+    controller.setEndpoint(endpoint);
     controller.accept().wait();
 
-    http_client client{{"http://localhost:33434"}};
+    http_client client{{endpoint}};
     auto task1 = client.request(methods::GET, "/bad-url/");
     auto result1 = task1.wait();
 
@@ -163,28 +186,50 @@ namespace {
     ASSERT_EQ(pplx::completed, result2);
     ASSERT_EQ("", task2.get());
     ASSERT_EQ(404, response.status_code());
+
+    controller.shutdown().wait();
+  }
+
+  TEST_F(ServiceFixture, createChildServlet) {
+    using web::http::client::http_client;
+    using web::http::method;
+    using web::http::methods;
+
+    std::string rootUrl{"/hello"};
+    std::string childUrl{"/world"};
+
+    controller.registerServlet<RootServlet>(std::string{rootUrl});
+    controller.registerServlet<RootChildServlet>(std::move(childUrl), rootUrl);
+
+    controller.setEndpoint(endpoint);
+    controller.accept().wait();
+
+    http_client client{{endpoint}};
+    auto task1 = client.request(methods::POST, "/hello");
+    auto result1 = task1.wait();
+
+    EXPECT_EQ(2u, ServletCache::getInstance()->typesSize());
+    EXPECT_EQ(2u, ServletCache::getInstance()->cacheSize());
+    EXPECT_EQ(1u, ServletCache::getInstance()->at("/hello")->childrenCount());
+    ASSERT_EQ(pplx::completed, result1);
+
+    auto task2 = client.request(methods::POST, "/hello/world");
+    auto result2 = task2.wait();
+    ASSERT_EQ(pplx::completed, result2);
+
+    auto response = task2.get();
+    auto task3 = response.extract_string();
+    auto result3 = task3.wait();
+    ASSERT_EQ(pplx::completed, result3);
+
+    ASSERT_EQ(RootChildServlet::BODY_STR, task3.get());
+
+    controller.shutdown().wait();
   }
 
 } // namespace
 
 int main(int argc, char** argv) {
-  /*
-  try {
-    server.accept().wait();
-
-    std::cout << "Now listening ’" << server.endpoint() << "’\n";
-
-    InterruptHandler::waitForUserInterrupt();
-
-    server.shutdown().wait();
-  } catch (std::exception& e) {
-    std::cerr << "Caught exception while trying to start the server - "
-              << e.what() << "\n";
-    return -1;
-  } catch (...) {
-    RuntimeUtils::printStackTrace();
-  }
-  */
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

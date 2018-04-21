@@ -10,36 +10,39 @@ namespace restful_servlets {
   AbstractServlet::AbstractServlet() {
   }
   AbstractServlet::AbstractServlet(const char* path)
-    : path_(path) {
+    : path_{path} {
   }
-  AbstractServlet::AbstractServlet(std::string const& path)
-    : path_(path) {
+  AbstractServlet::AbstractServlet(string const& path)
+    : path_{path} {
   }
-  AbstractServlet::AbstractServlet(std::string && path)
-    : path_(std::move(path)) {
+  AbstractServlet::AbstractServlet(string && path)
+    : path_{std::move(path)} {
   }
 
   bool AbstractServlet::doHandle(http_request & req) {
+    bool handled{false};
     auto const& p = req.request_uri().path();
-    if (p.size() > path_.size()) {
-      return false;
+    
+    if (auto idx = path_.find(">"); idx != string::npos) {
+      handled = handle(req);
     }
+    if (handled) { return handled; }
 
     // If exact path match, handle request directly.
     if (p == path_) {
       return handle(req);
     }
 
+    if (children_.empty()) { return handled; }
+
     // Is any part of request path owned by us?
     size_t i = 0;
     string subpath;
-    for (; i < path_.size(); ++i) {
-      if (path_[i] != p[i]) {
-	break;
-      }
+    for (; i < p.size(); ++i) {
+      if (path_[i] != p[i]) { break; }
     }
-    if (i != path_.size()) {
-      return false; // no sub-match
+    if (i < path_.size()) {
+      return handled; // no sub-match
     }
 
     subpath = p.substr(i); // sub-path
@@ -54,13 +57,20 @@ namespace restful_servlets {
       .set_fragment(req.request_uri().fragment());
     req.set_request_uri(builder.to_uri());
 
-    // Let children have a go at it
-    auto lowerMatches = children_.lower_bound(subpath);
-    lowerMatches++;
-    bool handled{false};
-    while ((lowerMatches != children_.begin()) &&
-	   (!(handled = lowerMatches->second->doHandle(req)))) {
-      --lowerMatches;
+    if (children_.size() < 100) {
+      for (auto & child : children_) {
+	if (handled = child.second->doHandle(req); handled) {
+	  return handled;
+	}
+      }
+    } else {
+      // Let children have a go at it
+      auto lowerMatches = children_.lower_bound(subpath);
+      lowerMatches++;
+      while ((lowerMatches != children_.begin()) &&
+	     (!(handled = lowerMatches->second->doHandle(req)))) {
+	--lowerMatches;
+      }
     }
 
     return handled;
