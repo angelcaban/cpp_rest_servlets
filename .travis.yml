@@ -12,6 +12,7 @@ addons:
       - llvm-6.0
       - clang-6.0
       - boost
+      - libboost1.63-all-dev
 
 script:
   - CXX=clang++ CC=clang cmake .
