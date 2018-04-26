@@ -6,20 +6,15 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
-      - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main'
-        key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+      - llvm-toolchain-trusty-6.0
+      - debian-sid
     packages:
       - llvm-6.0
       - clang-6.0
+      - libboost-all-dev
 
 script:
-  - cd "${TRAVIS_BUILD_DIR}/third_party/boost"
-  - tar xf boost_1_63_0.tar.bz2
-  - cd boost_1_63_0
-  - ./bootstrap.sh --with-toolset=gcc --with-libraries=all --prefix=..
-  - ./b2 -j3 link=shared threading=multi variant=release install > ../boost_build.log &
-  - while [[ $(jobs | grep b2) ]] ; do echo -ne '.\b' ; sleep 30 ; done
   - cd "${TRAVIS_BUILD_DIR}"
-  - CXX=clang++ CC=clang cmake .
+  - CXX=clang++-6.0 CC=clang-6.0 cmake .
   - cmake --build . -- -j3
 
