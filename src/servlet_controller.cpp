@@ -34,8 +34,7 @@ namespace restful_servlets {
   void ServletController::doHandle(http_request msg) {
     if (auto path = msg.relative_uri().path(); !path.empty()) {
       // Use or create the servlets
-      auto cache = ServletCache::getInstance();
-      for (auto & servlet : *cache) {
+      for (auto & servlet : ServletCache::getInstance()) {
 	if (servlet.second->doHandle(msg)) { return; }
       }
     }

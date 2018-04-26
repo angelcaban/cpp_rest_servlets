@@ -22,29 +22,26 @@
 #include "abstract_servlet.hpp"
 
 using std::string;
-using std::to_string;
 using web::uri_builder;
 using web::http::http_request;
 
 namespace restful_servlets {
 
-  AbstractServlet::AbstractServlet() {
-  }
   AbstractServlet::AbstractServlet(const char* path)
     : path_{path} {
   }
-  AbstractServlet::AbstractServlet(string const& path)
-    : path_{path} {
+  AbstractServlet::AbstractServlet(string path)
+    : path_{std::move(path)} {
   }
   AbstractServlet::AbstractServlet(string && path)
     : path_{std::move(path)} {
   }
 
-  bool AbstractServlet::doHandle(http_request & req) {
+  bool AbstractServlet::doHandle(http_request req) {
     bool handled{false};
     auto const& p = req.request_uri().path();
     
-    if (auto idx = path_.find(">"); idx != string::npos) {
+    if (auto idx = path_.find('>'); idx != string::npos) {
       handled = handle(req);
     }
     if (handled) { return handled; }

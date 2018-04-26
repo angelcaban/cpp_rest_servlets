@@ -28,12 +28,6 @@
 #include "network_utils.hpp"
 
 namespace cfx {
-  BasicController::BasicController() {
-  }
-
-  BasicController::~BasicController() {
-  }
-
   void BasicController::setEndpoint(const std::string & value) {
     uri endpointURI(value);
     uri_builder endpointBuilder;

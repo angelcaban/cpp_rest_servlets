@@ -1,0 +1,9 @@
+dist: artful
+sudo: false
+language: cpp
+
+script:
+        - cmake -G Ninja .
+        - cmake --build .
+
+

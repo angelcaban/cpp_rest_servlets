@@ -40,8 +40,8 @@ class BasicController {
   http_listener _listener;  // main micro service network endpoint
 
  public:
-  BasicController();
-  virtual ~BasicController();
+  BasicController() = default;
+  virtual ~BasicController() = default;
 
   void setEndpoint(const std::string& value);
   std::string endpoint() const;

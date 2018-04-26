@@ -1,0 +1,39 @@
+diff --git a/Release/include/pplx/pplxinterface.h b/Release/include/pplx/pplxinterface.h
+index 5df57771..8e01a864 100644
+--- a/Release/include/pplx/pplxinterface.h
++++ b/Release/include/pplx/pplxinterface.h
+@@ -52,6 +52,7 @@ typedef void (_pplx_cdecl * TaskProc_t)(void *);
+ struct __declspec(novtable) scheduler_interface
+ {
+     virtual void schedule( TaskProc_t, _In_ void* ) = 0;
++    virtual ~scheduler_interface() = default;
+ };
+ 
+ /// <summary>
+diff --git a/Release/include/pplx/pplxlinux.h b/Release/include/pplx/pplxlinux.h
+index 6aa1ba35..e935f7ba 100644
+--- a/Release/include/pplx/pplxlinux.h
++++ b/Release/include/pplx/pplxlinux.h
+@@ -239,7 +239,8 @@ namespace platform
+ #endif
+     {
+     public:
+-        _PPLXIMP virtual void schedule( TaskProc_t proc, _In_ void* param);
++        _PPLXIMP virtual void schedule(TaskProc_t proc, _In_ void* param) override;
++	virtual ~linux_scheduler() override = default;
+     };
+ 
+ } // namespace details
+diff --git a/Release/src/http/client/http_client_asio.cpp b/Release/src/http/client/http_client_asio.cpp
+index 4ba3e085..02e06b25 100644
+--- a/Release/src/http/client/http_client_asio.cpp
++++ b/Release/src/http/client/http_client_asio.cpp
+@@ -49,7 +49,7 @@
+ 
+ #if defined(__GNUC__)
+ 
+-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8)
++#if (__clang__ && __clang_major__ >= 6) || (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 8))
+ #define AND_CAPTURE_MEMBER_FUNCTION_POINTERS
+ #else
+ // GCC Bug 56222 - Pointer to member in lambda should not require this to be captured

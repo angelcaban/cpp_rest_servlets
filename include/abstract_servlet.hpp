@@ -45,9 +45,9 @@ class AbstractServlet {
   IdType path_;
 
  public:
-  AbstractServlet();
+  AbstractServlet() = default;
   AbstractServlet(const char* path);
-  AbstractServlet(std::string const& path);
+  AbstractServlet(std::string path);
   AbstractServlet(std::string&& path);
   virtual ~AbstractServlet() = default;
 
@@ -64,8 +64,8 @@ class AbstractServlet {
     return children_.size();
   }
 
-  bool doHandle(web::http::http_request& req);
-  virtual bool handle(web::http::http_request& req) = 0;
+  bool doHandle(web::http::http_request req);
+  virtual bool handle(web::http::http_request req) = 0;
 };
 
 }  // namespace restful_servlets

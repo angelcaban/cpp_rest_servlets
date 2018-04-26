@@ -62,7 +62,7 @@ namespace {
     ServiceFixture() {
     }
     virtual ~ServiceFixture() override {
-      ServletCache::getInstance()->clearAll();
+      ServletCache::getInstance().clearAll();
     }
   };
 
@@ -77,7 +77,7 @@ namespace {
     RootServlet(string&& path) : AbstractServlet(path) {}
     virtual ~RootServlet() override = default;
 
-    virtual bool handle(http_request& req) override {
+    virtual bool handle(http_request req) override {
       utf8string body{BODY_STR};
       req.reply(status_codes::OK, std::move(body),
 		"text/html; charset=utf-8");
@@ -96,7 +96,7 @@ namespace {
     RootChildServlet(string&& path) : AbstractServlet(path) {}
     virtual ~RootChildServlet() override = default;
 
-    virtual bool handle(http_request& req) override {
+    virtual bool handle(http_request req) override {
       utf8string body{BODY_STR};
       req.reply(status_codes::OK, std::move(body),
 		"text/html; charset=utf-8");
@@ -115,7 +115,7 @@ namespace {
     HelloWorldServlet(string&& path) : AbstractServlet(path) {}
     virtual ~HelloWorldServlet() override = default;
 
-    virtual bool handle(http_request& req) override {
+    virtual bool handle(http_request req) override {
       utf8string body{BODY_STR};
       req.reply(status_codes::OK, std::move(body),
 		"text/html; charset=utf-8");
@@ -124,26 +124,23 @@ namespace {
   };
 
   TEST_F(ServiceFixture, DefaultCtor) {
-    EXPECT_NE(nullptr, ServletCache::getInstance());
-    EXPECT_EQ(0u, ServletCache::getInstance()->typesSize());
-    EXPECT_EQ(0u, ServletCache::getInstance()->cacheSize());
+    EXPECT_EQ(0u, ServletCache::getInstance().typesSize());
+    EXPECT_EQ(0u, ServletCache::getInstance().cacheSize());
   }
 
   TEST_F(ServiceFixture, registerOneServlet) {
     controller.registerServlet<HelloWorldServlet>("/hello/world");
 
-    EXPECT_NE(nullptr, ServletCache::getInstance());
-    EXPECT_EQ(1u, ServletCache::getInstance()->typesSize());
-    EXPECT_EQ(1u, ServletCache::getInstance()->cacheSize());
+    EXPECT_EQ(1u, ServletCache::getInstance().typesSize());
+    EXPECT_EQ(1u, ServletCache::getInstance().cacheSize());
   }
 
   TEST_F(ServiceFixture, registerTwoServlets) {
     controller.registerServlet<HelloWorldServlet>("/hello-world");
     controller.registerServlet<RootServlet>("/");
 
-    EXPECT_NE(nullptr, ServletCache::getInstance());
-    EXPECT_EQ(2u, ServletCache::getInstance()->typesSize());
-    EXPECT_EQ(2u, ServletCache::getInstance()->cacheSize());
+    EXPECT_EQ(2u, ServletCache::getInstance().typesSize());
+    EXPECT_EQ(2u, ServletCache::getInstance().cacheSize());
   }
 
   TEST_F(ServiceFixture, createServlets) {
@@ -229,9 +226,9 @@ namespace {
     auto task1 = client.request(methods::POST, "/hello");
     auto result1 = task1.wait();
 
-    EXPECT_EQ(2u, ServletCache::getInstance()->typesSize());
-    EXPECT_EQ(2u, ServletCache::getInstance()->cacheSize());
-    EXPECT_EQ(1u, ServletCache::getInstance()->at("/hello")->childrenCount());
+    EXPECT_EQ(2u, ServletCache::getInstance().typesSize());
+    EXPECT_EQ(2u, ServletCache::getInstance().cacheSize());
+    EXPECT_EQ(1u, ServletCache::getInstance().at("/hello")->childrenCount());
     ASSERT_EQ(pplx::completed, result1);
 
     auto task2 = client.request(methods::POST, "/hello/world");

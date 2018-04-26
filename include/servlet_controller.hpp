@@ -44,15 +44,15 @@ namespace restful_servlets {
     template <typename T>
     void registerServlet(std::string && path,
 			 optional_parent parent = std::nullopt) {
-      auto cache = ServletCache::getInstance();
+      auto & cache = ServletCache::getInstance();
       std::string id{std::move(path)};
       if (parent) {
 	id += ">" + parent->get();
       }
-      cache->registerType(std::move(id),
-			  std::bind(&servlet_create<T>,
-				    std::placeholders::_1));
-      if (nullptr == cache->createOrFindServlet(id)) {
+      cache.registerType(std::move(id),
+			 std::bind(&servlet_create<T>,
+				   std::placeholders::_1));
+      if (nullptr == cache.createOrFindServlet(id)) {
 	std::string msg;
 	msg += id;
 	msg += " is an invalid ID.";
@@ -73,6 +73,10 @@ namespace restful_servlets {
     void initRestOpHandlers() override;
 
   private:
+    /*! FYI: It’s not obvious from the interface, but
+     *       http_request & http_response is a cheap
+     *       copy of a single pimpl
+     */
     void doHandle(http_request);
   };
 

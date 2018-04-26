@@ -25,17 +25,12 @@ using ServletCachePtr = std::unique_ptr<restful_servlets::ServletCache>;
 
 using std::unique_ptr;
 using std::string;
-using std::vector;
 using web::uri;
 
 namespace restful_servlets {
-  ServletCachePtr ServletCache::_singleton;
-
-  ServletCache *const ServletCache::getInstance() {
-    if (!_singleton) {
-      _singleton.reset(new ServletCache);
-    }
-    return _singleton.get();
+  ServletCache & ServletCache::getInstance() {
+    static ServletCache _instance;
+    return _instance;
   }
 
   ServletCache::abstract_type*
@@ -68,7 +63,7 @@ namespace restful_servlets {
     }
     if (nullptr != servlet) {
       _servlets.insert(servlet_container::value_type{
-	  std::move(id), unique_ptr<abstract_type>(servlet)});
+	  id, unique_ptr<abstract_type>(servlet)});
     }
 
     return servlet;

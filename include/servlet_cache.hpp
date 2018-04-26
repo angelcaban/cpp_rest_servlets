@@ -53,7 +53,6 @@ namespace restful_servlets {
     servlet_container _servlets;
 
     ServletCache() = default;
-    static std::unique_ptr<ServletCache> _singleton;
 
   public:
     ~ServletCache() = default;
@@ -110,7 +109,7 @@ namespace restful_servlets {
     ServletCache(ServletCache const&) = delete;
     ServletCache(ServletCache&&) = delete;
 
-    static ServletCache* const getInstance();
+    static ServletCache& getInstance();
   };
 
 } // restful_servlets
