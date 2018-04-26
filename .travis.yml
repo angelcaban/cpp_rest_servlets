@@ -17,7 +17,7 @@ script:
   - tar xf boost_1_63_0.tar.bz2
   - cd boost_1_63_0
   - ./bootstrap.sh --with-toolset=gcc --with-libraries=all --prefix=..
-  - ./b2 -j3 install
+  - ./b2 -j3 install > ../boost_build.log
   - cd "${TRAVIS_BUILD_DIR}"
   - CXX=clang++ CC=clang cmake .
   - cmake --build . -- -j3
