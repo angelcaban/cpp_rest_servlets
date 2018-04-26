@@ -10,14 +10,17 @@ set (Boost_USE_RELEASE_LIBS        ON)
 set (Boost_USE_MULTITHREADED       ON)
 set (Boost_USE_STATIC_RUNTIME      OFF)
 set (Boost_USE_STATIC_LIBS OFF CACHE BOOL "Link against boost statically.")
-set (INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
-set (INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
+set (INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries.")
+set (INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables.")
 set (INSTALL_INCLUDE_DIR include CACHE PATH
   "Installation directory for header files"
 )
-set(DEF_INSTALL_CMAKE_DIR lib/CMake/${PROJECT_NAME})
-set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
+set (DEF_INSTALL_CMAKE_DIR lib/CMake/${PROJECT_NAME})
+set (INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
   "Installation directory for CMake files"
+)
+set (BOOST_ROOT "${PROJECT_SOURCE_DIR}/third_party/boost"
+  CACHE PATH "Root of boost library."
 )
 
 # cpprestsdk ----------------------------------------------------
