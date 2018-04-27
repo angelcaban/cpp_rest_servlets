@@ -2,9 +2,6 @@ dist: trusty
 sudo: true
 language: cpp
 
-before_install:
-  - sudo apt-get remove -y binutils
-
 addons:
   apt:
     sources:
@@ -12,6 +9,7 @@ addons:
       - llvm-toolchain-trusty-6.0
       - debian-sid
     packages:
+      - g++-6
       - llvm-6.0
       - clang-6.0
       - libboost-all-dev
