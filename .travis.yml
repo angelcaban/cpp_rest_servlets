@@ -7,7 +7,6 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
       - llvm-toolchain-trusty-6.0
-      - debian-sid
     packages:
       - g++-6
       - llvm-6.0
