@@ -11,7 +11,7 @@ matrix:
             - sourceline: "ppa:samuel-bachmann/boost"
           packages:
             - clang-6.0
-           - libboost1.60-all-dev
+            - libboost1.60-all-dev
       env:
         - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
 
