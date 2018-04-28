@@ -17,5 +17,5 @@ addons:
 script:
   - cd "${TRAVIS_BUILD_DIR}"
   - CXX=clang++-6.0 CC=clang-6.0 cmake .
-  - cmake --build . -- -j3
+  - CXX=clang++-6.0 CC=clang-6.0 cmake --build . -- -j3
 
