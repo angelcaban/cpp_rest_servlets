@@ -7,6 +7,7 @@ matrix:
       addons:
         apt:
           sources:
+            - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-6.0
             - sourceline: "ppa:samuel-bachmann/boost"
           packages:
