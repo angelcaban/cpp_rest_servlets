@@ -39,7 +39,9 @@ if (NOT EXISTS "${CPPRESTSDK_ROOT}/patch_results.txt")
 endif ()
 
 execute_process (COMMAND
-  ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" "${CPPRESTSDK_SRC}"
+  ${CMAKE_COMMAND}
+    -DBUILD_TESTS=OFF -DBUILD_SAMPLES=OFF
+    -G "${CMAKE_GENERATOR}" "${CPPRESTSDK_SRC}"
   RESULT_VARIABLE result
   WORKING_DIRECTORY "${CPPRESTSDK_BUILD}"
 )
@@ -191,7 +193,7 @@ configure_file (${PROJECT_NAME}-version.cmake.in
   "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-version.cmake" @ONLY
 )
 install (FILES
-  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}-config.cmake"
+  "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
   "${PROJECT_BINARY_DIR}/${PROJECT_NAME}-version.cmake"
   DESTINATION "${INSTALL_CMAKE_DIR}"
 )
