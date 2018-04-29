@@ -3,6 +3,8 @@ FROM ubuntu:17.10
 WORKDIR /build
 ADD . /build
 
+RUN apt update
+RUN apt -y install python-software-properties
 RUN apt-add-repository "deb http://apt.llvm.org/artful/ llvm-toolchain-artful-6.0 main"
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
 RUN apt update
