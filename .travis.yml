@@ -10,12 +10,12 @@ matrix:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-6.0
             - sourceline: "ppa:samuel-bachmann/boost"
-	    - sourceline: "ppa:george-edison55/cmake-3.x"
+            - sourceline: "ppa:george-edison55/cmake-3.x"
           packages:
             - clang-6.0
             - libboost1.60-all-dev
-	    - cmake-data
-	    - cmake
+            - cmake-data
+            - cmake
       env:
         - MATRIX_EVAL="CC=clang-6.0 && CXX=clang++-6.0"
 
