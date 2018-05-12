@@ -30,9 +30,6 @@ namespace restful_servlets {
   AbstractServlet::AbstractServlet(const char* path)
     : path_{path} {
   }
-  AbstractServlet::AbstractServlet(string path)
-    : path_{std::move(path)} {
-  }
   AbstractServlet::AbstractServlet(string && path)
     : path_{std::move(path)} {
   }

@@ -1,0 +1,7 @@
+{
+  "servlet" : {
+    "name": "no_access",
+    "type": "python",
+    "source": "no_access.py"
+  }
+}

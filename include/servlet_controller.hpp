@@ -25,6 +25,7 @@
 #include <stdexcept>
 #include <functional>
 #include <servlet_cache.hpp>
+#include <json_servlet.hpp>
 
 namespace restful_servlets {
 
@@ -36,28 +37,49 @@ namespace restful_servlets {
   }
 
   class ServletController : public cfx::BasicController, cfx::IController {
+    void buildId(std::string & id,
+		 std::string && path,
+		 optional_parent parent = std::nullopt) {
+      id.assign(std::move(path));
+      if (parent) {
+	id += ">" + parent->get();
+      }
+    }
+
   public:
     ServletController() : BasicController() {
     }
     virtual ~ServletController() override = default;
 
     template <typename T>
-    void registerServlet(std::string && path,
-			 optional_parent parent = std::nullopt) {
-      auto & cache = ServletCache::getInstance();
-      std::string id{std::move(path)};
-      if (parent) {
-	id += ">" + parent->get();
-      }
-      cache.registerType(std::move(id),
-			 std::bind(&servlet_create<T>,
-				   std::placeholders::_1));
-      if (nullptr == cache.createOrFindServlet(id)) {
+    std::string registerServlet(std::string && path,
+				optional_parent parent = std::nullopt) {
+      auto &cache_ = ServletCache::getInstance();
+      std::string id;
+      buildId(id, std::move(path), parent);
+
+      std::string ret = id;
+      cache_.registerType(std::move(id),
+			  std::bind(&servlet_create<T>,
+				    std::placeholders::_1));
+      if (nullptr == cache_.createOrFindServlet(ret)) {
 	std::string msg;
-	msg += id;
+	msg += ret;
 	msg += " is an invalid ID.";
-	throw std::invalid_argument(msg);
+	throw std::invalid_argument{msg};
       }
+
+      return ret;
+    }
+
+    void registerJsonServlet(std::string && path,
+			     std::string && config_file,
+			     optional_parent parent = std::nullopt) {
+      auto id = registerServlet<JsonServlet>(std::move(path), parent);
+      auto &cache_ = ServletCache::getInstance();
+      auto *servlet = static_cast<JsonServlet*>(cache_.at(id).get());
+      servlet->setConfigPath(std::move(config_file));
+      servlet->loadConfig();
     }
 
     void handleGet(http_request) override;
@@ -74,8 +96,8 @@ namespace restful_servlets {
 
   private:
     /*! FYI: It’s not obvious from the interface, but
-     *       http_request & http_response is a cheap
-     *       copy of a single pimpl
+     *       http_request & http_response value type
+     *       is a cheap copy of a single pimpl
      */
     void doHandle(http_request);
   };

@@ -1,0 +1,7 @@
+{
+  "servlet" : {
+    "name": "hello_world",
+    "type": "python",
+    "source": "hello_world.py"
+  }
+}

@@ -1,10 +1,10 @@
 cmake_minimum_required (VERSION 3.0)
 
 project (cpp_rest_servlets CXX)
+set (CMAKE_MODULE_PATH             "${PROJECT_SOURCE_DIR}/cmake")
 set (CMAKE_CXX_STANDARD            17)
 set (${PROJECT_NAME}_VERSION       "1.0.0")
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set (Boost_USE_STATIC_LIBS         OFF)
 set (Boost_USE_DEBUG_LIBS          OFF)
 set (Boost_USE_RELEASE_LIBS        ON)
 set (Boost_USE_MULTITHREADED       ON)
@@ -19,14 +19,16 @@ set (DEF_INSTALL_CMAKE_DIR lib/CMake/${PROJECT_NAME})
 set (INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
   "Installation directory for CMake files"
 )
-set (BOOST_ROOT "${PROJECT_SOURCE_DIR}/third_party/boost"
-  CACHE PATH "Root of boost library."
-)
+#set (BOOST_ROOT "${PROJECT_SOURCE_DIR}/third_party/boost"
+#  CACHE PATH "Root of boost library."
+#)
 
 # cpprestsdk ----------------------------------------------------
 set (CPPRESTSDK_ROOT  "${PROJECT_SOURCE_DIR}/third_party/cpprestsdk")
 set (CPPRESTSDK_SRC   "${CPPRESTSDK_ROOT}/Release")
 set (CPPRESTSDK_BUILD "${PROJECT_BINARY_DIR}/cpprestsdk")
+set (BUILD_SAMPLES    OFF)
+set (BUILD_TESTS      OFF)
 file (MAKE_DIRECTORY  "${CPPRESTSDK_BUILD}")
 
 if (NOT EXISTS "${CPPRESTSDK_ROOT}/patch_results.txt")
@@ -106,18 +108,19 @@ add_subdirectory(
 # ---------------------------------------- END GTEST FRAMEWORK --
 
 find_library (cpprest "${CPPRESTSDK_BUILD}/Binaries")
-find_package (OpenSSL REQUIRED)
-find_package (Threads REQUIRED)
-find_package (Boost   REQUIRED
+find_package (OpenSSL  REQUIRED)
+find_package (Threads  REQUIRED)
+find_package (Python2  REQUIRED
   COMPONENTS
-    random
+    Interpreter
+    Development
+)
+find_package (Boost    REQUIRED
+  COMPONENTS
     system
-    thread
-    filesystem
-    chrono
-    atomic
     date_time
     regex
+    python
 )
 
 add_definitions(
@@ -126,24 +129,32 @@ add_definitions(
 
 include_directories (
   ${Boost_INCLUDE_DIRS}
+  ${Python2_INCLUDE_DIRS}
   ${PROJECT_SOURCE_DIR}/include
   ${PROJECT_SOURCE_DIR}/third_party/cpprestsdk/Release/include
 )
 
 # PROJECT -------------------------------------------------------
+file (GLOB py_srcs pyservlet/*.cpp)
+add_library (pyservlet MODULE ${py_srcs})
+target_link_libraries (pyservlet PRIVATE
+  ${Boost_LIBRARIES}
+  ${Python2_LIBRARIES}
+  cpprest
+)
+install (TARGETS pyservlet
+  EXPORT ${PROJECT_NAME}-targets
+  RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
+  LIBRARY DESTINATION "${INSTALL_LIB_DIR}"
+  ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+)
+
 file (GLOB src_files src/*.cpp)
 file (GLOB hdr_files include/*.hpp)
 add_library (${PROJECT_NAME} SHARED ${src_files} ${hdr_files})
 target_link_libraries (${PROJECT_NAME} PRIVATE
-  Boost::boost
-  Boost::random
-  Boost::system
-  Boost::thread
-  Boost::filesystem
-  Boost::chrono
-  Boost::atomic
-  Boost::date_time
-  Boost::regex
+  ${Boost_LIBRARIES}
+  ${Python2_LIBRARIES}
   cpprest
 )
 if (CLANG_TIDY_EXE)
@@ -169,6 +180,8 @@ install (TARGETS ${PROJECT_NAME}
 add_executable(service_test tests/service_test.cpp)
 target_link_libraries(service_test PRIVATE
   gtest cpprest
+  ${Boost_LIBRARIES}
+  ${Python2_LIBRARIES}
   ${OPENSSL_LIBRARIES}
   ${PROJECT_NAME}
 )

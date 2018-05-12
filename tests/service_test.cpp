@@ -72,9 +72,8 @@ namespace {
       "<html><body><h1>It Works!</h1></body></html>"};
 
     RootServlet() : AbstractServlet() {}
-    RootServlet(const char* path) : AbstractServlet(path) {}
-    RootServlet(string const& path) : AbstractServlet(path) {}
-    RootServlet(string&& path) : AbstractServlet(path) {}
+    RootServlet(const char* path) : AbstractServlet{path} {}
+    RootServlet(std::string&& path) : AbstractServlet{move(path)} {}
     virtual ~RootServlet() override = default;
 
     virtual bool handle(http_request req) override {
@@ -91,9 +90,8 @@ namespace {
       "{ \"child_of_root\" : true }"};
 
     RootChildServlet() : AbstractServlet() {}
-    RootChildServlet(const char* path) : AbstractServlet(path) {}
-    RootChildServlet(string const& path) : AbstractServlet(path) {}
-    RootChildServlet(string&& path) : AbstractServlet(path) {}
+    RootChildServlet(const char* path) : AbstractServlet{path} {}
+    RootChildServlet(std::string&& path) : AbstractServlet{move(path)} {}
     virtual ~RootChildServlet() override = default;
 
     virtual bool handle(http_request req) override {
@@ -110,9 +108,8 @@ namespace {
       "<html><body><strong>hello world</strong></body></html>"};
 
     HelloWorldServlet() : AbstractServlet() {}
-    HelloWorldServlet(const char* path) : AbstractServlet(path) {}
-    HelloWorldServlet(string const& path) : AbstractServlet(path) {}
-    HelloWorldServlet(string&& path) : AbstractServlet(path) {}
+    HelloWorldServlet(const char* path) : AbstractServlet{path} {}
+    HelloWorldServlet(std::string&& path) : AbstractServlet{move(path)} {}
     virtual ~HelloWorldServlet() override = default;
 
     virtual bool handle(http_request req) override {
@@ -213,11 +210,11 @@ namespace {
     using web::http::method;
     using web::http::methods;
 
-    std::string rootUrl{"/hello"};
-    std::string childUrl{"/world"};
-
-    controller.registerServlet<RootServlet>(std::string{rootUrl});
-    controller.registerServlet<RootChildServlet>(std::move(childUrl), rootUrl);
+    string helloPath{"/hello"};
+    string worldPath{"/world"};
+    controller.registerServlet<RootServlet>(move(string{"/hello"}));
+    controller.registerServlet<RootChildServlet>(move(worldPath),
+						 helloPath);
 
     controller.setEndpoint(endpoint);
     controller.accept().wait();
@@ -241,6 +238,70 @@ namespace {
     ASSERT_EQ(pplx::completed, result3);
 
     ASSERT_EQ(RootChildServlet::BODY_STR, task3.get());
+
+    controller.shutdown().wait();
+  }
+
+  TEST_F(ServiceFixture, createPythonServlet) {
+    using web::http::client::http_client;
+    using web::http::method;
+    using web::http::methods;
+
+    string rootPath{"/"};
+    string configPath{"../tests/python_servlet/hello_world.json"};
+    controller.registerJsonServlet(std::move(rootPath),
+				   std::move(configPath));
+    EXPECT_EQ(1u, ServletCache::getInstance().typesSize());
+    EXPECT_EQ(1u, ServletCache::getInstance().cacheSize());
+
+    controller.setEndpoint(endpoint);
+    controller.accept().wait();
+
+    http_client client{{endpoint}};
+    auto task1 = client.request(methods::POST, "/");
+    auto result1 = task1.wait();
+    ASSERT_EQ(pplx::completed, result1);
+
+    auto response = task1.get();
+    EXPECT_EQ(http::status_codes::OK, response.status_code());
+
+    auto task2 = response.extract_string();
+    auto result2 = task2.wait();
+    ASSERT_EQ(pplx::completed, result2);
+
+    ASSERT_EQ("HELLO FROM PYTHON", task2.get());
+
+    controller.shutdown().wait();
+  }
+
+  TEST_F(ServiceFixture, createPythonServletUnauthorized) {
+    using web::http::client::http_client;
+    using web::http::method;
+    using web::http::methods;
+
+    string rootPath{"/login"};
+    string configPath{"../tests/python_servlet/no_access.json"};
+    controller.registerJsonServlet(std::move(rootPath),
+				   std::move(configPath));
+    EXPECT_EQ(1u, ServletCache::getInstance().typesSize());
+    EXPECT_EQ(1u, ServletCache::getInstance().cacheSize());
+
+    controller.setEndpoint(endpoint);
+    controller.accept().wait();
+
+    http_client client{{endpoint}};
+    auto task1 = client.request(methods::POST, "/login");
+    auto result1 = task1.wait();
+    ASSERT_EQ(pplx::completed, result1);
+
+    auto response = task1.get();
+    EXPECT_EQ(http::status_codes::Unauthorized, response.status_code());
+
+    auto task2 = response.extract_string();
+    auto result2 = task2.wait();
+    ASSERT_EQ(pplx::completed, result2);
+
+    ASSERT_EQ("ACCESS DENIED", task2.get());
 
     controller.shutdown().wait();
   }

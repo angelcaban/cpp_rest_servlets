@@ -37,3 +37,17 @@ index 4ba3e085..02e06b25 100644
  #define AND_CAPTURE_MEMBER_FUNCTION_POINTERS
  #else
  // GCC Bug 56222 - Pointer to member in lambda should not require this to be captured
+diff --git a/Release/include/cpprest/ws_msg.h b/Release/include/cpprest/ws_msg.h
+index 326541c7..ec76ec61 100644
+--- a/Release/include/cpprest/ws_msg.h
++++ b/Release/include/cpprest/ws_msg.h
+@@ -182,6 +182,9 @@ private:
+ class websocket_incoming_message
+ {
+ public:
++    websocket_incoming_message()
++      : m_msg_type{websocket_message_type::text_message} {
++    }
+ 
+     /// <summary>
+     /// Extracts the body of the incoming message as a string value, only if the message type is UTF-8.
