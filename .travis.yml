@@ -22,6 +22,9 @@ before_install:
     - eval "${MATRIX_EVAL}"
 
 script:
+  - sed -i -e 's/BUILD_TESTS ON/BUILD_TESTS OFF/g' third_party/cpprestsdk/Release/CMakeLists.txt
+  - sed -i -e 's/BUILD_TESTS ON/BUILD_TESTS OFF/g' third_party/cpprestsdk/Release/libs/websocketpp/CMakeLists.txt
+  - sed -i -e 's/BUILD_SAMPLES ON/BUILD_SAMPLES OFF/g' third_party/cpprestsdk/Release/CMakeLists.txt
   - mkdir build-debug
   - cd build-debug
   - cmake -DCMAKE_INSTALL_PREFIX=../.. ..
