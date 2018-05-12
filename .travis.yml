@@ -26,6 +26,6 @@ script:
   - cd build-debug
   - cmake -DCMAKE_INSTALL_PREFIX=../.. ..
   - cmake --build . -- -j3
-  - ./service_test
+  - PYTHONPATH=`pwd`:$PYTHONPATH ./service_test
   - cmake --build . -- install
 
