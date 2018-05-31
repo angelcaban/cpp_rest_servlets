@@ -48,22 +48,23 @@ namespace restful_servlets {
       id_ = uri::encode_uri(id_.substr(0, sep_index));
     }
 
-    auto* servlet = _factory.create(id);
+    auto *servlet = _factory.create(id);
 
     if (parent_id_ && nullptr != servlet) {
       if (auto parent_iter = _servlets.find(*parent_id_);
-	  parent_iter != _servlets.end()) {
-	parent_iter->second->addChild(id_, servlet);
+          parent_iter != _servlets.end()) {
+        parent_iter->second->addChild(id_, servlet);
       } else {
-	std::string what = "Parent ID \"";
-	what += *parent_id_;
-	what += "\" is invalid.";
-	throw std::invalid_argument{what};
+        std::string what = "Parent ID \"";
+        what += *parent_id_;
+        what += "\" is invalid.";
+        throw std::invalid_argument{what};
       }
     }
     if (nullptr != servlet) {
       _servlets.insert(servlet_container::value_type{
-	  id, unique_ptr<abstract_type>(servlet)});
+          id, unique_ptr<abstract_type>(servlet)
+      });
     }
 
     return servlet;

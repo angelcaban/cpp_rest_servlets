@@ -72,19 +72,20 @@ namespace restful_servlets {
       .set_fragment(req.request_uri().fragment());
     req.set_request_uri(builder.to_uri());
 
+    // Let children have a go at it (switch between sequential or tree
+    // depending on size)
     if (children_.size() < 100) {
       for (auto & child : children_) {
-	if (handled = child.second->doHandle(req); handled) {
-	  return handled;
-	}
+        if (handled = child.second->doHandle(req); handled) {
+          return handled;
+        }
       }
     } else {
-      // Let children have a go at it
       auto lowerMatches = children_.lower_bound(subpath);
       lowerMatches++;
       while ((lowerMatches != children_.begin()) &&
-	     (!(handled = lowerMatches->second->doHandle(req)))) {
-	--lowerMatches;
+          (!(handled = lowerMatches->second->doHandle(req)))) {
+        --lowerMatches;
       }
     }
 

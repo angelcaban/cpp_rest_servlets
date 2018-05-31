@@ -34,13 +34,13 @@ namespace restful_servlets {
   void ServletController::doHandle(http_request msg) {
     try {
       if (auto path = msg.relative_uri().path(); !path.empty()) {
-	// Use or create the servlets
-	for (auto & servlet : ServletCache::getInstance()) {
-	  if (servlet.second->doHandle(msg)) { return; }
-	}
+        // Use or create the servlets
+        for (auto &servlet : ServletCache::getInstance()) {
+          if (servlet.second->doHandle(msg)) { return; }
+        }
       }
       msg.reply(status_codes::NotFound);
-    } catch (std::exception & e) {
+    } catch (std::exception &e) {
       msg.reply(status_codes::InternalError, e.what());
     }
   }

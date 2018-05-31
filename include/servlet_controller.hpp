@@ -37,47 +37,48 @@ namespace restful_servlets {
   }
 
   class ServletController : public cfx::BasicController, cfx::IController {
-    void buildId(std::string & id,
-		 std::string && path,
-		 optional_parent parent = std::nullopt) {
+    void buildId(std::string &id,
+                 std::string &&path,
+                 optional_parent parent = std::nullopt) {
       id.assign(std::move(path));
       if (parent) {
-	id += ">" + parent->get();
+        id += ">" + parent->get();
       }
     }
 
   public:
     ServletController() : BasicController() {
     }
-    virtual ~ServletController() override = default;
+    ~ServletController() override = default;
 
     template <typename T>
-    std::string registerServlet(std::string && path,
-				optional_parent parent = std::nullopt) {
+    std::string registerServlet(std::string &&path,
+                                optional_parent parent = std::nullopt) {
       auto &cache_ = ServletCache::getInstance();
       std::string id;
-      buildId(id, std::move(path), parent);
+      buildId(id, std::move(path), std::move(parent));
 
       std::string ret = id;
       cache_.registerType(std::move(id),
-			  std::bind(&servlet_create<T>,
-				    std::placeholders::_1));
+                          std::bind(&servlet_create<T>,
+                                    std::placeholders::_1));
       if (nullptr == cache_.createOrFindServlet(ret)) {
-	std::string msg;
-	msg += ret;
-	msg += " is an invalid ID.";
-	throw std::invalid_argument{msg};
+        std::string msg;
+        msg += ret;
+        msg += " is an invalid ID.";
+        throw std::invalid_argument{msg};
       }
 
       return ret;
     }
 
-    void registerJsonServlet(std::string && path,
-			     std::string && config_file,
-			     optional_parent parent = std::nullopt) {
-      auto id = registerServlet<JsonServlet>(std::move(path), parent);
+    void registerJsonServlet(std::string &&path,
+                             std::string &&config_file,
+                             optional_parent parent = std::nullopt) {
+      auto id = registerServlet<JsonServlet>(std::move(path),
+                                             std::move(parent));
       auto &cache_ = ServletCache::getInstance();
-      auto *servlet = static_cast<JsonServlet*>(cache_.at(id).get());
+      auto *servlet = dynamic_cast<JsonServlet *>(cache_.at(id).get());
       servlet->setConfigPath(std::move(config_file));
       servlet->loadConfig();
     }

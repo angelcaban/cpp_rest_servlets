@@ -113,4 +113,4 @@ BOOST_PYTHON_MODULE(libpyservlet) {
          copy_const_policy())
     .def("reply", static_cast<reply>(&http_request::reply));
 
-}
+} // boost python module libpyservlet

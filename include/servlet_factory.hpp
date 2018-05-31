@@ -29,7 +29,7 @@ namespace restful_servlets {
 
   template<class Servlet, class Sid, class MakeType>
   struct ServletFactory : public boost::container::flat_map<Sid, MakeType> {
-    /*! Register a create function to the Sevlet Factory.
+    /*! Register a create function to the Servlet Factory.
      *  We require that the create function turns a pointer
      *  of type ‘Servlet‘. Map the create function to a 
      *  unique identifier. */
@@ -40,10 +40,10 @@ namespace restful_servlets {
     /*! Create a new instance of a ‘Servlet‘ given a unique
      *  identifier. If the creator was never registered, a
      *  null pointer will be returned. */
-    typename std::remove_pointer<Servlet>::type*
-    create(Sid id) const {
-      if (auto i = this->find(id); i != this->end())
-	return i->second(std::move(id));
+    typename std::remove_pointer<Servlet>::type *create(Sid id) const {
+      if (auto i = this->find(id); i != this->end()) {
+        return i->second(std::move(id));
+      }
       return nullptr;
     }
   };

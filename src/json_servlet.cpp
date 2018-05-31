@@ -63,9 +63,9 @@ namespace restful_servlets {
 
     string impl{configTree.get<string>("servlet.type")};
     if (boost::iequals(impl, "python")) {
-      impl_ = ServletImplmentation::PYTHON;
+      impl_ = ServletImplementation::PYTHON;
     } else if (boost::iequals(impl, "so")) {
-      impl_ = ServletImplmentation::SO;
+      impl_ = ServletImplementation::SO;
     }
 
     path source{configTree.get<string>("servlet.source")};
@@ -78,18 +78,16 @@ namespace restful_servlets {
 
   bool JsonServlet::handle(http_request req) {
     switch (impl_) {
-    case ServletImplmentation::PYTHON:
+    case ServletImplementation::PYTHON:
       return forwardRequestToPython(req, impl_source_);
 
-    case ServletImplmentation::SO:
+    case ServletImplementation::SO:
       // angelcaban: TODO
       return false;
 
-    case ServletImplmentation::INVALID:
+    case ServletImplementation::INVALID:
       return false;
     }
-
-    return false;
   }
 
 } // namespace restful_servlets

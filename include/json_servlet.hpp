@@ -25,22 +25,22 @@
 
 namespace restful_servlets {
 
-  enum class ServletImplmentation : uint32_t {
+  enum class ServletImplementation : uint32_t {
     INVALID = 0,
     PYTHON,
     SO
   };
 
   class JsonServlet : public AbstractServlet {
-    ServletImplmentation impl_{ServletImplmentation::INVALID};
+    ServletImplementation impl_{ServletImplementation::INVALID};
     std::string config_file_;
     std::string servlet_name_;
     std::string impl_source_;
 
   public:
     JsonServlet() = default;
-    JsonServlet(const char* path);
-    JsonServlet(std::string&& path);
+    explicit JsonServlet(const char* path);
+    explicit JsonServlet(std::string&& path);
 
     void setConfigPath(std::string&& path) {
       config_file_ = std::move(path);
@@ -48,10 +48,13 @@ namespace restful_servlets {
     void setConfigPath(const char* path) {
       config_file_ = path;
     }
+    const std::string getName() const {
+      return servlet_name_;
+    }
 
     void loadConfig();
 
-    virtual bool handle(web::http::http_request req) override;
+    bool handle(web::http::http_request req) override;
   };
 
 } // namespace restful_servlets
