@@ -42,14 +42,14 @@ namespace cfx {
   std::string NetworkUtils::hostIP(uint16_t family) {
     auto hostInetInfo = queryHostInetInfo();
     tcp::resolver::iterator end;
-    while(hostInetInfo != end) {
+    while (hostInetInfo != end) {
       tcp::endpoint ep = *hostInetInfo++;
       sockaddr sa = *ep.data();
       if (sa.sa_family == family) {
-	return ep.address().to_string();
+        return ep.address().to_string();
       }
     }
-    return nullptr;
+    return "";
   }
    
 } // namespace cfx

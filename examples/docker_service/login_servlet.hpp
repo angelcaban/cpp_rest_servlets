@@ -1,6 +1,6 @@
 /*
  * Copyright 2018 Angel Caban
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this
  * software and associated documentation files (the "Software"), to deal in the Software
  * without restriction, including without limitation the rights to use, copy, modify,
@@ -21,15 +21,20 @@
 
 #pragma once
 
-#include <basic_controller.hpp>
-#include <abstract_servlet.hpp>
-#include <servlet_cache.hpp>
-#include <servlet_exceptions.hpp>
-#include <servlet_controller.hpp>
-#include <map>
-#include <string>
-#include <utility>
+#ifndef CPP_REST_SERVLETS_LOGIN_SERVLET_HPP
+#define CPP_REST_SERVLETS_LOGIN_SERVLET_HPP
 
-namespace restful_servlets {
-  
-} // namespace restful_servlets
+#include <abstract_servlet.hpp>
+
+class LoginServlet : public restful_servlets::AbstractServlet {
+public:
+  LoginServlet(const char* path) : restful_servlets::AbstractServlet(path) {
+  }
+  LoginServlet(std::string path)
+      : restful_servlets::AbstractServlet(std::move(path)) {
+  }
+
+  bool handle(web::http::http_request req) override;
+};
+
+#endif //CPP_REST_SERVLETS_LOGIN_SERVLET_HPP

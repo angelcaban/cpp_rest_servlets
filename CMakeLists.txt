@@ -1,9 +1,8 @@
 cmake_minimum_required (VERSION 3.0)
 
-project (cpp_rest_servlets CXX)
+project (cpp_rest_servlets LANGUAGES CXX VERSION "1.0.0")
 set (CMAKE_MODULE_PATH             "${PROJECT_SOURCE_DIR}/cmake")
 set (CMAKE_CXX_STANDARD            17)
-set (${PROJECT_NAME}_VERSION       "1.0.0")
 set (CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set (Boost_USE_DEBUG_LIBS          OFF)
 set (Boost_USE_RELEASE_LIBS        ON)
@@ -19,6 +18,7 @@ set (DEF_INSTALL_CMAKE_DIR lib/CMake/${PROJECT_NAME})
 set (INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH
   "Installation directory for CMake files"
 )
+set (BUILD_EXAMPLES OFF CACHE BOOL "Build examples.")
 #set (BOOST_ROOT "${PROJECT_SOURCE_DIR}/third_party/boost"
 #  CACHE PATH "Root of boost library."
 #)
@@ -51,13 +51,13 @@ if (result)
   message (FATAL_ERROR "CMake step [generate] for cpprestsdk failed: ${result}")
 endif ()
 
-execute_process (COMMAND ${CMAKE_COMMAND} --build .
-  RESULT_VARIABLE result
-  WORKING_DIRECTORY "${CPPRESTSDK_BUILD}"
-)
-if (result)
-  message (FATAL_ERROR "CMake step [build] for cpprestsdk failed: ${result}")
-endif ()
+#execute_process (COMMAND ${CMAKE_COMMAND} --build .
+#  RESULT_VARIABLE result
+#  WORKING_DIRECTORY "${CPPRESTSDK_BUILD}"
+#)
+#if (result)
+#  message (FATAL_ERROR "CMake step [build] for cpprestsdk failed: ${result}")
+#endif ()
 
 add_subdirectory (
   "${CPPRESTSDK_SRC}"
@@ -213,3 +213,7 @@ install (FILES
 install (EXPORT ${PROJECT_NAME}-targets DESTINATION
   "${INSTALL_CMAKE_DIR}"
 )
+
+# EXAMPLES ------------------------------------------------------
+add_subdirectory("${PROJECT_SOURCE_DIR}/examples")
+# ----------------------------------------------- END EXAMPLES --

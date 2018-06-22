@@ -59,9 +59,8 @@ namespace {
   public:
     ServletController controller;
 
-    ServiceFixture() {
-    }
-    virtual ~ServiceFixture() override {
+    ServiceFixture() = default;
+    ~ServiceFixture() override {
       ServletCache::getInstance().clearAll();
     }
   };
@@ -72,11 +71,11 @@ namespace {
       "<html><body><h1>It Works!</h1></body></html>"};
 
     RootServlet() : AbstractServlet() {}
-    RootServlet(const char* path) : AbstractServlet{path} {}
-    RootServlet(std::string&& path) : AbstractServlet{move(path)} {}
-    virtual ~RootServlet() override = default;
+    explicit RootServlet(const char* path) : AbstractServlet{path} {}
+    explicit RootServlet(std::string&& path) : AbstractServlet{move(path)} {}
+    ~RootServlet() override = default;
 
-    virtual bool handle(http_request req) override {
+    bool handle(http_request req) override {
       utf8string body{BODY_STR};
       req.reply(status_codes::OK, std::move(body),
 		"text/html; charset=utf-8");
@@ -90,11 +89,11 @@ namespace {
       "{ \"child_of_root\" : true }"};
 
     RootChildServlet() : AbstractServlet() {}
-    RootChildServlet(const char* path) : AbstractServlet{path} {}
-    RootChildServlet(std::string&& path) : AbstractServlet{move(path)} {}
-    virtual ~RootChildServlet() override = default;
+    explicit RootChildServlet(const char* path) : AbstractServlet{path} {}
+    explicit RootChildServlet(std::string&& path) : AbstractServlet{move(path)} {}
+    ~RootChildServlet() override = default;
 
-    virtual bool handle(http_request req) override {
+    bool handle(http_request req) override {
       utf8string body{BODY_STR};
       req.reply(status_codes::OK, std::move(body),
 		"text/html; charset=utf-8");
@@ -108,11 +107,11 @@ namespace {
       "<html><body><strong>hello world</strong></body></html>"};
 
     HelloWorldServlet() : AbstractServlet() {}
-    HelloWorldServlet(const char* path) : AbstractServlet{path} {}
-    HelloWorldServlet(std::string&& path) : AbstractServlet{move(path)} {}
-    virtual ~HelloWorldServlet() override = default;
+    explicit HelloWorldServlet(const char* path) : AbstractServlet{path} {}
+    explicit HelloWorldServlet(std::string&& path) : AbstractServlet{move(path)} {}
+    ~HelloWorldServlet() override = default;
 
-    virtual bool handle(http_request req) override {
+    bool handle(http_request req) override {
       utf8string body{BODY_STR};
       req.reply(status_codes::OK, std::move(body),
 		"text/html; charset=utf-8");

@@ -1,6 +1,6 @@
 /*
  * Copyright 2018 Angel Caban
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this
  * software and associated documentation files (the "Software"), to deal in the Software
  * without restriction, including without limitation the rights to use, copy, modify,
@@ -19,17 +19,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#pragma once
+#include "logout_servlet.hpp"
 
-#include <basic_controller.hpp>
-#include <abstract_servlet.hpp>
-#include <servlet_cache.hpp>
-#include <servlet_exceptions.hpp>
-#include <servlet_controller.hpp>
-#include <map>
-#include <string>
-#include <utility>
 
-namespace restful_servlets {
-  
-} // namespace restful_servlets
+bool LogoutServlet::handle(web::http::http_request req) {
+  return false;
+}

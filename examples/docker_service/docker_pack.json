@@ -1,0 +1,16 @@
+{
+  "builders":[
+    {
+      "type": "docker",
+      "image": "ubuntu",
+      "export_path": "registration_service.tar",
+      "changes": [
+        "WORKDIR /docker",
+        "EXPOSE 8080",
+        "LABEL version=1.0",
+        "ONBUILD RUN date",
+        "ENTRYPOINT /docker/registration_service"
+      ]
+    }
+  ]
+}
